@@ -211,6 +211,17 @@ public:
 
 // assign operator
   self_t & operator=(const self_t & rhs) = default;
+
+// move constructor
+
+  sparse_array(self_t && other)
+  : _data(std::move(other._data))
+  , _size(other._size)
+  { }
+
+// move assign operator
+
+  self_t & operator=(self_t && rhs) = default; // since memberwise move should be exactly what we want
     
 // destructor
   ~sparse_array() = default;
