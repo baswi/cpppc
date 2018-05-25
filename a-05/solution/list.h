@@ -121,7 +121,7 @@ public:
   self_t & operator=(self_t && rhs){
     while (!empty()){pop_front();}
     _begin = std::move(rhs._begin);
-    rhs._begin = rhs._end;
+    rhs._begin = other._end;
     return *this;
   }
     

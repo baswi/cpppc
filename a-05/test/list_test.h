@@ -24,4 +24,7 @@ public:
 
 };
 
+template<class A>
+A f(A a) { return a; };
+
 #endif // CPPPC__05__LIST_TEST_H__INCLUDED

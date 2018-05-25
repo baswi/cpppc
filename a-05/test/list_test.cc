@@ -190,3 +190,15 @@ TEST_F(ListTest, ListLIFO)
   LOG_MESSAGE("listTest.ListLIFO: list__delete");
   v.~list();
 }
+
+TEST_F(ListTest, ListMOVES)
+{
+  LOG_MESSAGE("listTest.ListMOVES: list__new");
+  list<int> v1, v2;
+  list<int>::iterator viter1 = v1.begin();
+  list<int>::iterator viter2 = v2.begin();
+
+  LOG_MESSAGE("listTest.ListMOVES: list__move-assign from rvalue temporary");
+//  v1 = f(list<int>());
+//  ASSERT_EQ(v1.begin(), viter1);
+}

@@ -130,3 +130,42 @@ TEST_F(SparseArrayTest, ArrayInterface)
 */
 }
 
+TEST_F(SparseArrayTest, ArrayMOVE)
+{
+
+  constexpr int N = 540 * NMULT;
+  sparse_array<int, N> sa1;
+  sparse_array<int, N> sa2;
+  sparse_array<int, N> sa3;
+/*
+  sparse_array<int, N>::iterator IterSa2_1 = sa1.begin();
+
+  LOG_MESSAGE("SparseArrayTest.move-assign: rvalue temp");
+  sa1 = f(sparse_array<int, N>());
+
+  sparse_array<int, N>::iterator IterSa1_2 = sa1.begin();
+  ASSERT_EQ(IterSa2_1, sa1.begin());
+*/
+
+  sa1[11] = 12;
+  sa1[22] = 24;
+
+  // Copy assignment
+  sa2 = sa1;
+
+  // sa2 is a copy of sa1
+  ASSERT_EQ(12, sa1[11]);
+  ASSERT_EQ(24, sa1[22]);
+  ASSERT_EQ(12, sa2[11]);
+  ASSERT_EQ(24, sa2[22]);
+
+  // Move assignment
+  sa3 = std::move(sa1);
+
+  // sa1 is empty, the original values are in sa3
+  ASSERT_EQ(0, sa1[11]);
+  ASSERT_EQ(0, sa1[22]);
+  ASSERT_EQ(12, sa3[11]);
+  ASSERT_EQ(24, sa3[22]);
+
+}

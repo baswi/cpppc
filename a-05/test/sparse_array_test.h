@@ -1,5 +1,5 @@
-#ifndef CPPPC__A03__SPARSE_ARRAY_TEST_H__INCLUDED
-#define CPPPC__A03__SPARSE_ARRAY_TEST_H__INCLUDED
+#ifndef CPPPC__A05__SPARSE_ARRAY_TEST_H__INCLUDED
+#define CPPPC__A05__SPARSE_ARRAY_TEST_H__INCLUDED
 
 #include <gtest/gtest.h>
 #include "TestBase.h"
@@ -24,4 +24,7 @@ public:
 
 };
 
-#endif // CPPPC__A03__SPARSE_ARRAY_TEST_H__INCLUDED
+template<class A>
+A f(A a) { return a; };
+
+#endif // CPPPC__A05__SPARSE_ARRAY_TEST_H__INCLUDED
