@@ -33,3 +33,6 @@
 
 # Temps
 *.swp
+
+# Binary
+*.bin

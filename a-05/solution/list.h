@@ -108,6 +108,23 @@ public:
     return *this;
   }
 
+// move constructor
+
+  list(self_t && other)
+  : _tail()
+  , _end(&_tail)
+  , _begin(std::move(other._begin))
+  { other._begin = _end; }
+
+// move assign operator
+
+  self_t & operator=(self_t && rhs){
+    while (!empty()){pop_front();}
+    _begin = std::move(rhs._begin);
+    rhs._begin = rhs._end;
+    return *this;
+  }
+    
 
     iterator begin() const{
       return _begin;
