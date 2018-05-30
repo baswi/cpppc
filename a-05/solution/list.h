@@ -53,7 +53,9 @@ namespace cpppc
       }
 
       bool operator==(const self_t & rhs) const {
-        return  (_list_node == &rhs); // equal member
+        return  (  _list_node == &rhs
+		|| (_list_node->next == nullptr && (&rhs)->next == nullptr)
+		);
       }
 
       bool operator!=(const self_t & rhs) {
@@ -80,7 +82,6 @@ namespace cpppc
 
 
 
-
 public:
   list()    //Konstruktor
   : _tail(),_end(&_tail), _begin(&_tail) //wichtig um iterator zu bilden..?
@@ -88,7 +89,7 @@ public:
   {}
 
   ~list(){    //Destruktor
-    while (!empty()){
+    while (not empty() && not ((&_begin)->next == nullptr)){
       pop_front();
     }
   }
@@ -113,15 +114,19 @@ public:
   list(self_t && other)
   : _tail()
   , _end(&_tail)
-  , _begin(std::move(other._begin))
-  { other._begin = _end; }
+  , _begin(std::move(&other._begin))
+//  , _begin(&other._begin)
+  { 
+	  other._begin = other._end; 
+  }
 
 // move assign operator
 
   self_t & operator=(self_t && rhs){
+	  
     while (!empty()){pop_front();}
     _begin = std::move(rhs._begin);
-    rhs._begin = other._end;
+    rhs._begin = rhs._end;
     return *this;
   }
     
