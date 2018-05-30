@@ -53,15 +53,15 @@ public:
 // operators
 
   proxy operator*(){
-    //return proxy(*_sparse_array, _pos);
+  //  return proxy(static_cast<reference>(*_sparse_array), _pos);
     return (*_sparse_array)[_pos];
   }
 
 // der verzweifelte Versuch nen overloading für operator* zu erreichen, das dann vom const_iterator aufgerufen wird...  
-  const value_type operator*(choose<true, const SparseArrayT*, SparseArrayT*>) const{
+/*  const value_type operator*(choose<true, const SparseArrayT*, SparseArrayT*>) const{
     return _sparse_array._data[_pos];
   }
-
+*/
   self_t operator+(int offset){
     _pos += offset;
     return *this;
@@ -138,6 +138,8 @@ class sparse_array_proxy_ref
 
 public:
 
+  sparse_array_proxy_ref() = delete;
+
   sparse_array_proxy_ref(SparseArrayT & sparse_array, index_t index)
   : _sparse_array(sparse_array)
   , _index(index)
@@ -179,14 +181,14 @@ class sparse_array
   // Just a suggestion:
 
   typedef sparse_array<T, N>           		        	self_t;
-  typedef detail::sparse_array_proxy_ref<self_t>		proxy;
   typedef std::size_t						size_type;
   typedef size_type						index_t;
-  typedef T					  		value_type;
-  typedef std::unordered_map<size_type, value_type>		data;
 
 public:
 
+  typedef T					  		value_type;
+  typedef std::unordered_map<size_type, value_type>		data;
+  typedef detail::sparse_array_proxy_ref<self_t>		proxy;
   typedef detail::sparse_array_iterator<self_t>  		iterator;
   typedef detail::sparse_array_iterator<const self_t, true>	const_iterator;
   typedef std::reverse_iterator<iterator>			reverse_iterator;
@@ -194,6 +196,7 @@ public:
 
   friend iterator;
   friend const_iterator;
+  friend reverse_iterator;
   friend proxy;
 
 public:
@@ -221,7 +224,11 @@ public:
 
 // move assign operator
 
-  self_t & operator=(self_t && rhs) = default; // since memberwise move should be exactly what we want
+//  self_t & operator=(self_t && rhs) = default; // since memberwise move should be exactly what we want
+  self_t & operator=(self_t && rhs) {
+    std::swap(_data, rhs._data);
+  }
+    
     
 // destructor
   ~sparse_array() = default;
@@ -240,7 +247,9 @@ public:
   }
 
   const value_type & operator[](const index_t i) const{
-    return *_data.find(i);
+    if(_data.find(i) == _data.end())
+      return std::move(value_type());
+    return _data.find(i)->second;
   }
 
 // iterator

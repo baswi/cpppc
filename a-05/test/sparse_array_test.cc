@@ -101,7 +101,7 @@ TEST_F(SparseArrayTest, ArrayInterface)
   ASSERT_EQ(sa1, sa2);
 
   sa2[sa2.size() / 2] = 0;
-//  ASSERT_LT(sa2, sa1);
+  ASSERT_LT(sa2, sa1);
 //  ASSERT_GT(sa1, sa2);
 
   sa2.fill(std::numeric_limits<int>::max());
