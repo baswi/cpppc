@@ -12,10 +12,10 @@ namespace detail {
 
 template <class SparseArrayT>
 class sparse_array_iterator
-  :   public bases::IteratorBase<
+  :   public bases::IteratorBase_rnd_acc<
 	sparse_array_iterator<SparseArrayT>   // Derived
        ,typename SparseArrayT::proxy          // ValueType
-       ,int                                   // IndexType
+       ,int                                   // IndexType -> difference_type
        ,SparseArrayT*                         // Pointer
        ,typename SparseArrayT::proxy          // Reference
       >
@@ -23,7 +23,7 @@ class sparse_array_iterator
   using self_t	   =    sparse_array_iterator;
   using index_t    =	int;
   using proxy	   =	typename SparseArrayT::proxy;
-  using base_t     =    bases::IteratorBase< self_t, proxy, index_t, SparseArrayT*, proxy >;
+  using base_t     =    bases::IteratorBase_rnd_acc< self_t, proxy, index_t, SparseArrayT*, proxy >;
 
 public:
   using pointer			= SparseArrayT*;

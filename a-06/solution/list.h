@@ -1,6 +1,7 @@
 
 //#include <iterator>
 #include <iostream>
+#include "IteratorBase.h"
 
 namespace cpppc
 {
@@ -20,12 +21,21 @@ namespace cpppc
     //
 
 // list<T>::iterator
-    class iterator {
-      typedef typename cpppc::list<ValueT, default_value> list_t;
-      typedef typename list_t::list_node list_node;
-      typedef typename list_t::iterator self_t;
+    class iterator
+      : public bases::IteratorBase<
+  	  list_t::iterator                      // Derived
+         ,ValueT                                // ValueType
+         ,std::ptrdiff_t                        // IndexType
+         ,list_t::list_node*                    // Pointer
+         ,list_t::list_node                     // Reference
+        >
+    {
+      typedef typename        cpppc::list<ValueT, default_value> list_t;
+      typedef typename        list_t::list_node list_node;
+      typedef typename        list_t::iterator self_t;
+      using base_t         =  bases::IteratorBase_forward< ValueT, ValueT, std::ptrdiff_t, list_node*, list_node >;
+      using std::ptrdiff_t =  index_t;
     public:
-       //iterator() = delete;
 
       iterator(list_node * node) //initialwert
       : _list_node(node)
@@ -33,24 +43,15 @@ namespace cpppc
        //
       }
 
-      iterator & operator++() { //prefix
-        _list_node = _list_node->next;
-        return *this;
-      }
 
-      iterator operator++(int) { //postfix
-        iterator old = *this;
-        _list_node = _list_node->next;
-        return old;
-      }
-
-      ValueT & operator*() {
+      ValueT & dereference() const{
         return _list_node->value;
       }
-
+/* ????????????????????????????????????????
       const ValueT & operator*() const {
         return _list_node->value;
       }
+???????????????????????????????????????? */
 
       bool operator==(const self_t & rhs) const {
         return  (  _list_node == &rhs
@@ -76,6 +77,16 @@ namespace cpppc
 
 
     private:
+      friend base_t;
+
+      void increment(index_t offset) {
+        for(index_t i=0; i < offset; ++i){
+          if(_list_node->next == nullptr)
+		  break;
+	  _list_node = _list_node->next;
+	}
+      }
+
       list_node * _list_node;
     };
 ////////Ende Iterator
