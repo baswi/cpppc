@@ -59,10 +59,6 @@ namespace cpppc
 		);
       }
 
-      bool operator!=(const self_t & rhs) {
-        return not (*this==rhs);
-      }
-
       list_node *  operator&(){ //getter von list_node von außerhalb liegender iteratoren
         return _list_node;
       }
