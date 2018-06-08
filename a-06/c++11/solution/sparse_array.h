@@ -67,6 +67,10 @@ private:
     _pos -= sub;
   }
 
+  index_t pos() const{
+    return _pos;
+  }
+
 private:
   pointer		_sparse_array;
   index_t		_pos;
@@ -83,6 +87,30 @@ class sparse_array_proxy_ref
 public:
 
   sparse_array_proxy_ref() = delete;
+ ~sparse_array_proxy_ref() = default;
+
+  sparse_array_proxy_ref(const self_t & other)
+  : _sparse_array(other._sparse_array)
+  , _index(other._index)
+  { }
+/*  
+// how to move to a non-const lvalue ref?
+  sparse_array_proxy_ref(self_t && other)
+  : _sparse_array(std::move(&other._sparse_array))
+//  : _sparse_array(other._sparse_array)
+  , _index(other._index)
+  { }
+*/  
+
+// undefined if not from same sparse_array!!  
+ self_t & operator=(const self_t & rhs){
+   if(_sparse_array == rhs._sparse_array){
+     _index = rhs._index;
+     return *this;
+   }
+ }
+ self_t & operator=(self_t && rhs) = default; // since memberwise move should be exactly what we want
+
 
   sparse_array_proxy_ref(SparseArrayT & sparse_array, index_t index)
   : _sparse_array(sparse_array)

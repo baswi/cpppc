@@ -54,24 +54,55 @@ public:
     return derived().dereference();
   }
 
+  reference operator->() const{
+    return derived().dereference();
+  }
+
+  reference operator[](int pos){
+//TODO test this    return *(derived().increment(pos));
+    derived().increment(pos);
+    return derived().dereference();
+  }
+
   derived_t operator+(int offset){
     derived().increment(offset);
     return derived();
   }
 
+  derived_t operator-(int offset){
+    derived().decrement(offset);
+    return derived();
+
+  }
+
   difference_type operator-(const derived_t & rhs) const{
-//TODO: find a way where you don't have to access the private member _pos directly	  
-    return derived()._pos - rhs._pos;
+    return derived().pos() - rhs.pos();
   }
 
  bool operator==(const derived_t & rhs) const{
-//TODO: find a way where you don't have to access the private member _pos directly	  
-    return ( derived()._pos == rhs._pos ); 
+    return ( derived().pos() == rhs.pos() ); 
   }
 
   bool operator!=(const derived_t & rhs) const{
     return !(derived() == rhs);
   }
+
+  bool operator<(const derived_t & rhs) const{
+    return derived().pos() < rhs.pos();
+  }
+
+  bool operator>(const derived_t & rhs) const{
+    return derived().pos() > rhs.pos();
+  }
+
+  bool operator<=(const derived_t & rhs) const{
+    return derived().pos() <= rhs.pos();
+  }
+
+  bool operator>=(const derived_t & rhs) const{
+    return derived().pos() >= rhs.pos();
+  }
+
 
   // Pre-increment
   derived_t & operator++(){
@@ -104,23 +135,28 @@ public:
     return old;
   }
 
+  derived_t & operator-=(difference_type rhs){
+    derived().decrement(rhs);
+    return derived();
+  }
+
 
 }; // class IteratorBase_rnd_acc
 
 template<
-  class Derived,
-  class ValueType    = typename Derived::value_type,
-  class IndexType    = int,
-  class Pointer      = ValueType *,
-  class Reference    = ValueType & >
+  class Derived
+ ,class ValueType    = typename Derived::value_type
+ ,class IndexType    = int
+ ,class Pointer      = ValueType *
+ ,class Reference    = ValueType & >
 class IteratorBase_forward{
 
   typedef IteratorBase_forward<
-            Derived,
-            ValueType,
-            IndexType,
-            Pointer,
-            Reference >          self_t;
+            Derived
+           ,ValueType
+           ,IndexType
+           ,Pointer
+           ,Reference >          self_t;
   typedef IndexType		 index_type;
   typedef Derived                derived_t;
 
@@ -155,23 +191,16 @@ public:
     return derived().dereference();
   }
 
-  derived_t operator+(int offset){
-    derived().increment(offset);
-    return derived();
-  }
-
-  difference_type operator-(const derived_t & rhs) const{
-//TODO: find a way where you don't have to access the private member _pos directly	  
-    return derived()._pos - rhs._pos;
+  reference operator->() const{
+    return derived().dereference();
   }
 
  bool operator==(const derived_t & rhs) const{
-//TODO: find a way where you don't have to access the private member _pos directly	  
-    return ( derived()._pos == rhs._pos ); 
+    return ( derived()._pos() == rhs._pos() ); 
   }
 
   bool operator!=(const derived_t & rhs) const{
-    return !(derived() == rhs);
+    return not derived() == rhs;
   }
 
   // Pre-increment
@@ -186,25 +215,6 @@ public:
     derived().increment(1);
     return old;
   }
-
-  derived_t & operator+=(difference_type rhs){
-    derived().increment(rhs);
-    return derived(); 
-  }
-
-  // Pre-decrement
-  derived_t & operator--(){
-    derived().decrement(1);
-    return derived();
-  }
-
-  // Post-decrement
-  derived_t operator--(int){
-    derived_t old(derived());
-    derived().decrement(1);
-    return old;
-  }
-
 
 }; // class IteratorBase_forward
 

@@ -79,14 +79,14 @@ TEST_F(SparseArrayTest, ArrayInterface)
   sa1.back()  = 999;
   ASSERT_EQ(*sa1.begin(), sa1.front());
   ASSERT_EQ(*sa1.begin(), 111);
-//  ASSERT_EQ(*sa1.rbegin(), sa1.back());
-//  ASSERT_EQ(*sa1.rbegin(), 999);
+  ASSERT_EQ(*sa1.rbegin(), sa1.back());
+  ASSERT_EQ(*sa1.rbegin(), 999);
 
   std::swap(sa1, sa2);
   ASSERT_EQ(*sa2.begin(), sa2.front());
   ASSERT_EQ(*sa2.begin(), 111);
-//  ASSERT_EQ(*sa2.rbegin(), sa2.back());
-//  ASSERT_EQ(*sa2.rbegin(), 999);
+  ASSERT_EQ(*sa2.rbegin(), sa2.back());
+  ASSERT_EQ(*sa2.rbegin(), 999);
 
   // You know what you didn't do in a long time? Swapping to disk.
   // Say hello to oomkiller from fuchsto.
