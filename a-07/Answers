@@ -1,0 +1,60 @@
+7-2
+
+- How do comparison operators of pair<A,B> depend on types A and B?
+
+To compare two different pairs with each other the lhs' A and B (type) need to be identical to the rhs' A and B type. Otherwise you'll get a compiler error.
+
+
+- How can we specify comparison of pair<A0,B0> and pair<A1,B1>?
+
+std::get<0>(lhs) == std::get<0>(rhs) && std::get<1>(lhs) == std::get<1>(rhs)
+
+
+- What is the benefit of std::get over pair.first / pair.second (use compiler explorer)
+
+see pair.cpp: by just counting the number of operations get is worth. I think one could argue that get as not beeing a member function can be used more general. A member function needs to be implemented for every single implementation of e.g. pair. 
+
+via get one can make use of perfect forwarding
+
+
+- Why don’t we just always use std::get?
+it isn't defined/implemented for every struct ?
+
+
+
+7-3
+...
+Two of those are Modifying Sequence Operation and Non-Modifying Sequence Operation.
+
+-> is it correct to say:
+   non-mod are alg. that by them self (by their implementation) do not modify any of their parameters
+   modifying on the other side do modify at least one of their parameters.
+  ??
+
+   or is it that non-mod alg guarantee that iterators are not invalidated?
+
+   
+to show that not all stackoverflow answers are bad: https://stackoverflow.com/questions/662845/why-is-stdfor-each-a-non-modifying-sequence-operation
+   so my first thought about non-mod seems to be right. But the whole definition needs to be more clearly/specific
+   -> the structur of the container is (not) modified.
+
+- In the overview of STL algorithms, algorithms like std::sort and std::partition are not in die Modifying category. Why?
+
+   special category for special algorithms?!? special meaning sorting and partitioning are their own categories
+
+
+- Are there algorithms that return their result as a new sequence? Why? Discuss a minimal use-case to illustrate this.
+
+   equal_range ?!?
+   sample      -> Returns a copy of out after the last sample that was output, that is, end of the sample range.
+
+
+
+- Which algorithms allow to add or remove elements from their input ranges?
+
+  for_each (e.g. by using the lambda to modify the range)
+  (fill ?)
+  remove, remove_if
+  (unique -> but is not erasing, physical size of the container is unchanged)
+  destroy
+
