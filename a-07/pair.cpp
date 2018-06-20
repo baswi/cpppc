@@ -102,9 +102,5 @@ int main()
 //	auto comp7 = (p_fi2 == p_li2);
 
 
-
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	std::this_thread::sleep_for(std::chrono::milliseconds(5));
-	return 0;
 }
 
