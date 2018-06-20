@@ -1,3 +1,7 @@
+# Hidden stuff
+.*
+!.gitignore
+
 # Prerequisites
 *.d
 
@@ -36,3 +40,7 @@
 
 # Binary
 *.bin
+
+#Visual Studio
+*.vcxproj
+*.vcxproj.*
