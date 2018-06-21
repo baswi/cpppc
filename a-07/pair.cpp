@@ -47,20 +47,19 @@ int main()
 //                                         |                   |       mov      |          |            |       |
 //                                         |                   |       mov      |          |            |       |
 //                                         |                   |      call      |          |            |       |
-//                                     cvtsi2sd                |        |       |          |            |       |
-//                                      movapd                 |        |       |          |            |       |
+//                                         |                   |    cvtsi2sd    |          |            |       |
 //                                          `--------------- addsd ----´        |          |            |       |
 //                                                           movsd              |          |            |       |
 //                                                             |                |         lea           |       |
 //                                                             |                |         mov           |       |
-//                                                             |                |         call          |       |
+//                                                             |                |        call           |       |
 //                                                             |                |         mov           |       |
 //                                                             |                |         mov           |       |
-//                                                             |                |         call          |       |
-//                                                         cvtsi2sd             |          |            |       |
+//                                                             |                |        call           |       |
+//                                                             |                |      cvtsi2sd         |       |
 //                                                              `------------ addsd ------´             |       |        
 //                                                                              |                       |      mov
-//                                                                          cvtsi2sd                    |       |
+//                                                                              |                       |   cvtsi2sd
 //                                                                               `------------------- addsd ---´
 //                                                                                                    movsd
 
