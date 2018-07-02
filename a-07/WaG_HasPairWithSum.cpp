@@ -1,7 +1,7 @@
 #include <unordered_set>
 #include <vector>
 
-
+/*
 bool HasPairWithSum(const std::vector<int> data, int sum) {
 	std::unordered_set<int> comp; //complements
 	for (int value : data) {
@@ -23,3 +23,4 @@ decltype(auto) summandsOf(C && summands, V && sum) {
 // views/filter? ---> only (values <= sum)
 // ----> use subranges
 }
+*/
