@@ -1,0 +1,40 @@
+1.1
+   Assuming you are confronted with a class that supports the following use case:
+
+DateParser date_parser;
+date_parser.set_date(today);
+
+auto day = date_parser.day_of_week();
+
+What is your objection to this? How would you change the interface of class DateParser?
+
+
+?möglichst auf Memberfunctions (Methods) verzichten (keine '.'functions)
+besser:
+
+date direkt im konstruktor verlangen?
+globale funktion? parser als funktion implementieren (auto day = parse_date(today))
+
+
+
+
+1.2
+ohne direkte nutzung gibt es keinen compiler-error. da es keine syntaktischen fehler enthält. 
+
+kein default-konstruktor -> da cpy-const auto-delete?? -> führt daher zu error wenn ein leeres objekt erzeugt werden soll. hier bei SemanticSurprise s1; 
+
+SemanticSurprise s1;          // <-- Op?    kein default-konstruktor, da cpy-constr. vorhanden -> error
+s1.value();                   // <-- value? ---
+
+SemanticSurprise s2(4);       // <-- Op?    ?assignment?-constr.
+s2.value();                   // <-- value? 4 -> wurde im konstruktor mit übergeben und im Member _value gespeichert
+
+SemanticSurprise s3 = s2;     // <-- Op?    copy-assignment operator -> hier nicht vorhanden wird dann aber 'gedefaulted' was memberweises copy-assignment bedeutet
+s3.value();                   // <-- value? 4 -> wurde per memberweisem copy-assign zugewiesen
+
+SemanticSurprise s4(s3);      // <-- Op?    cpy-constr.
+s4 == s3;                     // <-- value? true, da s4 mittels cpy-constr. erzeugt wurde und hierbei memberweise der cpy-constr., hier für _value, mit dem _value von s3 als Parameter aufgerufen wurde. Hierdurch haben nach dem durchführen des constr. s4 und s3 den selben state
+s2 != s3;                     // <-- value? compile-error -> no match for 'operator!='
+
+
+
