@@ -44,3 +44,10 @@
 #Visual Studio
 *.vcxproj
 *.vcxproj.*
+*.sln
+*.tlog
+*.lastbuildstate
+*.idb
+*.pdb
+*.ilk
+*.log
