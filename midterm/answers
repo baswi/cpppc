@@ -87,3 +87,27 @@ RAII ist eine gängige Technik. Hierbei wird die lebenszeit einer ressource an d
 zur verfügung steht. weiterhin wird garantiert, dass die ressourcen freigegeben werden, wenn die lebenszeit des objekts endet (destructor wird in umgekehrter reihenfolge aufgerufen)
 
 
+
+4.1
+
+// Shared vector instance accessed by thread A and thread B:
+std::vector<int> v;
+
+// thread A:                    | thread B:                    ||  answers:
+// =============================|==============================||=============================================================================================================================
+   std::vector<int> a;          | std::vector<int> b;		   || two disjoint objects are constructed -> thread-safe
+// -----------------------------+------------------------------||-----------------------------------------------------------------------------------------------------------------------------
+   int xa = v[3];               | int xb = v[4];			   || 1. two disjoint elements & 2. only read (+cpy) access -> thread-safe
+// -----------------------------+------------------------------||-----------------------------------------------------------------------------------------------------------------------------
+   v[3] = 123;                  | v[4] = 345;				   || two disjoint elements & no structural change to the container(vector) -> thread-safe
+// -----------------------------+------------------------------||-----------------------------------------------------------------------------------------------------------------------------
+   v[3] = 123;                  | int xb = v[3];			   || read / write on the same element -> NOT thread-safe
+// -----------------------------+------------------------------||-----------------------------------------------------------------------------------------------------------------------------
+   v.push_back(24);             | v.size();					   || read / write on the same element (push_back is adding elems -> write to size cause size == #elems) -> NOT thread-safe
+// -----------------------------+------------------------------||-----------------------------------------------------------------------------------------------------------------------------
+   v.back();                    | v.push_back(54);			   || concurrent access & write on back + push_back leads possible invalidation of all iterators and references -> NOT thread-safe
+// -----------------------------+------------------------------||-----------------------------------------------------------------------------------------------------------------------------
+   v.begin();                   | v.push_back(34);			   || push_back leads possible invalidation of all iterators and references -> NOT thread-safe
+// -----------------------------+------------------------------||-----------------------------------------------------------------------------------------------------------------------------
+   v.back();                    | v.pop_back();				   || pop_back invalidates the back() iterator & reference -> NOT thread-safe
+// -----------------------------+------------------------------||-----------------------------------------------------------------------------------------------------------------------------
