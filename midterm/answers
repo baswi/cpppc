@@ -23,7 +23,7 @@ ohne direkte nutzung gibt es keinen compiler-error. da es keine syntaktischen fe
 
 kein default-konstruktor -> da cpy-const auto-delete?? -> führt daher zu error wenn ein leeres objekt erzeugt werden soll. hier bei SemanticSurprise s1; 
 
-SemanticSurprise s1;          // <-- Op?    kein default-konstruktor, da cpy-constr. vorhanden -> error
+SemanticSurprise s1;          // <-- Op?    kein default-konstruktor, da cpy-constr./bzw. da allg. user-declared-constr. vorhanden -> error
 s1.value();                   // <-- value? ---
 
 SemanticSurprise s2(4);       // <-- Op?    ?assignment?-constr.
@@ -36,5 +36,54 @@ SemanticSurprise s4(s3);      // <-- Op?    cpy-constr.
 s4 == s3;                     // <-- value? true, da s4 mittels cpy-constr. erzeugt wurde und hierbei memberweise der cpy-constr., hier für _value, mit dem _value von s3 als Parameter aufgerufen wurde. Hierdurch haben nach dem durchführen des constr. s4 und s3 den selben state
 s2 != s3;                     // <-- value? compile-error -> no match for 'operator!='
 
+
+How can this implementation be simplified? What is the requirement for this simplification?
+
+da alles was die Implementierung macht zwei werte auf == zu überprüfen, kann man es auch direkt darauf reduzieren und einfach nur nen Funktion die auf equality prüft implementieren.
+Oder streng genommen den ==operator des jeweiligen typs direkt benutzen...
+oh grade nochmal gesehen, der typ ist immer int...ja int == int ?!?
+wenn man aber unbedint ne Klasse benötigt, die einen einzelnen int speichert und man unbedingt auch noch nen default constr. haben will + nen user-declared-constr. man also alles daran setzt die rule of 0 nicht umsetzen zu können,
+dann könnte man wohl die rule of 5 mittels alles auf '= default' zu setzen. Obs dann aber noch simplified ist?...
+Wenn man sich nun aber durchringen kann und zumindest den Wert nicht per constr. zu übergeben, dann könnte man die rule of 0 umsetzen und den Wert dann halt per Member-function speichern
+
+
+
+Given the implementation of SemanticSurprise above, the following use case leads to a compiler error:
+
+void print_surprise(const SemanticSurprise & s) {
+  std::cout << "SemanticSurprise.value: " << s.value() << std::endl;
+}
+
+print_surprise(SemanticSurprise(10));
+Explain the compiler error and how the implementation of SemanticSurprise has to be corrected.
+
+
+da der Parameter als const markiert ist, was er wenn man ihn mittels rvalue/temp aufrufen können will auch sinnvoll ist, muss dann aber auch jede Memberfunktion,
+welche man mittels des const typs benutzen möchte, als const markiert sein.
+Hier dann also:
+  int value() const{
+              -----
+    return _value;
+  }
+
+
+1.3
+Consider the following use case:
+
+// ...
+if (condition) {
+        LogFileReader log_reader("performance.log");
+        if (log_reader.lines().size() > 1024) { return; }
+}
+// ...
+Judging from its usage illustrated above: which rule must be satisfied in the implementation of class  LogFileReader (or one of its members)?
+die rule of 3 bzw besser noch die rule of 5. -> irgendwer muss sich um eine Art Speicherverwaltung kümmern, dabei kann es zu fehlern kommen.
+insb. dann problematisch, wenn während der abarbeitung eines Konstruktors ein fehler passiert und im Body vom Konstruktor noch änderungen am state des Objekts
+vorgenommen werden, welche notwendig sind um das Objekt in einen gültigen state zu bringen. genauer gesagt wenn im konstruktor eines Objekts ein error passiert und
+einer der Member noch keinen gültigen state hat, kann das unter anderem zu memory-leaks führen. oder wenn im konstruktor selbst memory alloziert wird und dann ein error
+passiert und dadurch der speicher nicht wieder freigegeben wird (destructor benötigt gültigen state)
+Name a popular technique in resource management that depends on this rule, and briefly explain its principle.
+RAII ist eine gängige Technik. Hierbei wird die lebenszeit einer ressource an die eines objekts gebunden und garantiert, dass die ressource zur lebenszeit des objekts
+zur verfügung steht. weiterhin wird garantiert, dass die ressourcen freigegeben werden, wenn die lebenszeit des objekts endet (destructor wird in umgekehrter reihenfolge aufgerufen)
 
 
