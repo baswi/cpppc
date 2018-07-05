@@ -41,28 +41,29 @@ Damit kann nun jeder Container der mindestens nen InputIterator liefert die Funk
 	{
 	public:
 		using value_type = T;
-		using size_type  = std::size_t;
+		using size_type = std::size_t;
 
-/***************************************************************/
-/******************     CHUNKS__ITERATOR     *******************/
-/***************************************************************/
+		/***************************************************************/
+		/******************     CHUNKS__ITERATOR     *******************/
+		/***************************************************************/
 		class iterator {
-			using self_t    = iterator;
-			using chunk_t   = chunks;
-			using pos_t     = int;
-			using index_t   = int;
-
-// not sure if T is the correct type since then every chunk_iter dereferences to the first elem of its chunk?!?
-			using difference_type    =  std::ptrdiff_t;
-			using value_type         =  T;
-			using pointer            =  T*;
-			using reference          =  T&;
-			using iterator_category  =  std::random_access_iterator_tag;
+			using self_t = iterator;
+			using chunk_t = chunks;
+			using pos_t = int;
+			using index_t = int;
+		public:
+			// not sure if T is the correct type since then every chunk_iter dereferences to the first elem of its chunk?!?
+			using difference_type = std::ptrdiff_t;
+			using value_type = T;
+			using pointer = T * ;
+			using reference = T & ;
+			using iterator_category = std::random_access_iterator_tag;
 
 		public:
+			iterator() = delete;
 			iterator(chunk_t & chunk, const pos_t & pos)
-			: _chunk(chunk)
-			, _pos(pos)
+				: _chunk(chunk)
+				, _pos(pos)
 			{ }
 
 
@@ -79,14 +80,30 @@ Damit kann nun jeder Container der mindestens nen InputIterator liefert die Funk
 				return old;
 			}
 
-			constexpr decltype(auto) operator[](index_t  i){
-				return _chunk._container;
+			constexpr bool operator==(const self_t & rhs) const noexcept {
+				return _pos == rhs._pos;
 			}
 
-			constexpr auto begin() noexcept {
-			// TODO(new): 
-			//       correct elem_iterator
-				return elem_iterator();
+			constexpr bool operator!=(const self_t & rhs) const noexcept {
+				return !(*this == rhs);
+			}
+
+			auto operator-(const self_t & rhs) {
+				return (_pos - rhs._pos);
+			}
+
+			auto operator[](index_t  i) {
+				return *(elem_iterator(_chunk, 0, (_pos + i)));
+			}
+
+			// ...:begin' cannot result in a constant expression ??? WHY ...?!?!?!?
+			auto begin() noexcept {
+				return elem_iterator(_chunk, 0, _pos);
+			}
+
+			// part of the hack to satisfy the example... see chunks operator[] and the example for more details
+			constexpr decltype(auto) data() const {
+				return &(_chunk.elem(_pos * (B / sizeof(T))));
 			}
 
 		private:
@@ -100,29 +117,81 @@ Damit kann nun jeder Container der mindestens nen InputIterator liefert die Funk
 		}; // iterator
 
 
-/***************************************************************/
-/******************      ELEM__ITERATOR      *******************/
-/***************************************************************/
+		   /***************************************************************/
+		   /******************      ELEM__ITERATOR      *******************/
+		   /***************************************************************/
 
 		class elem_iterator {
 			using self_t = elem_iterator;
-			using pos_t  = int;
+			using chunk_t = chunks;
+			using pos_t = int;
+			using index_t = int;
 
-			using difference_type	= std::ptrdiff_t;
-			using value_type		= T;
-			using pointer			= T * ;
-			using reference			= T & ;
+		public:
+			using difference_type = std::ptrdiff_t;
+			using value_type = T;
+			using pointer = T * ;
+			using reference = T & ;
 			using iterator_category = std::random_access_iterator_tag;
 
+		public:
+			elem_iterator() = delete;
+			elem_iterator(chunk_t & chunk, const pos_t & pos, const pos_t & chunkPos)
+				: _chunk(chunk)
+				, _pos(pos)
+				, _chunkPos(chunkPos)
+			{ }
+
+			// Pre-increment
+			self_t & operator++() {
+				increment(1);
+				return *this;
+			}
+
+			// Post-increment
+			self_t operator++(int) {
+				self_t old(*this);
+				increment(1);
+				return old;
+			}
+
+			constexpr bool operator==(const self_t & rhs) const noexcept {
+				return ((_pos == rhs._pos) && (_chunkPos == rhs._chunkPos));
+			}
+
+			constexpr bool operator!=(const self_t & rhs) const noexcept {
+				return !(*this == rhs);
+			}
+
+			auto operator-(const self_t & rhs) {
+				return (_pos - rhs._pos);
+			}
+
+			constexpr decltype(auto) operator*() const {
+				/* too dumb to figure this out atm...
+				// for this to work the chunk operator[] need to return the correct part of the container -> a view would be great...wouldn't it?!?
+				return (_chunk[_chunkPos])[_pos];
+				*/
+				return _chunk.elem((_chunkPos * (B / sizeof(T))) + _pos);
+			}
+
+
 		private:
-			pos_t _pos;
+			void increment(const index_t & offset) {
+				_pos += offset;
+			}
+
+		private:
+			chunk_t & _chunk;
+			pos_t     _pos;
+			pos_t     _chunkPos;
 		}; // elem_iterator
 
 
 	public:
 
-		explicit chunks(Container && c)
-		: _container(std::forward<Container>(c))
+		explicit chunks(Container & container)
+			: _container(container)
 		{ }
 
 		constexpr auto begin() noexcept {
@@ -130,17 +199,28 @@ Damit kann nun jeder Container der mindestens nen InputIterator liefert die Funk
 		}
 
 		constexpr auto end() noexcept {
-			// TODO(new): 
-			//       correct iterator
-			return iterator();
+			int numChunks = ((std::size(_container) * sizeof(T))
+				/
+				B);
+			return iterator(*this, (++numChunks));
+		}
+
+		// some sort of view would be the best...but I'm out of time & not that sure how to implement it correctly....
+		// so this is my hack to satisfy the example...
+		constexpr auto operator[](int offset) const {
+			return iterator(*this, offset);
+		}
+
+		// not nice (meaning not what I want) but can't get my head around how to quickly build a view for the elem_Iter to access the Elems...
+		constexpr auto elem(int pos) const {
+			return _container[pos];
 		}
 
 	private:
 		// hmm is const right here?!?
 		const Container & _container;
 
-
-	}; // class chunks
+	}; //class chunks
 
 
 	
@@ -207,7 +287,7 @@ Damit kann nun jeder Container der mindestens nen InputIterator liefert die Funk
 		for (std::size_t i = 0; use != end; ++i, ++use) {
 			indices.push_back(i);
 		}
-		std::random_shuffle(std::begin(indices), std::end(indices));
+		std::shuffle(std::begin(indices), std::end(indices));
 		for (auto i : indices) {
 			use = begin;
 			std::cout << use[i] << " | ";
@@ -294,6 +374,43 @@ int main() {
 	cpppc::print_walk(std::begin(fli1), std::end(fli1));
 	std::cout << "\n\nprint_walk biDiIter:\n";
 	cpppc::print_walk(std::begin(li1), std::end(li1));
+
+//******************************************************************************
+//********************************* CHUNKS *************************************
+//******************************************************************************
+
+	std::vector<uint16_t> v_us;
+
+	//                                    ,-- wrapped container
+	//                                    |
+	cpppc::chunks<128, uint16_t, std::vector<uint16_t>> v_chunks(v_us);
+	//             |      |
+	//             |      '-- element type
+	//             |
+	//             '-- maximum size of a
+	//                 single chunk in bytes
+
+	// Iterate chunks:
+	auto first_chunk = v_chunks.begin();
+	auto num_chunks = std::distance(v_chunks.begin(), v_chunks.end());
+
+	std::cout << num_chunks << '\n';
+	// --> 128/(16/8) = 64
+
+	// Iterators on elements in a chunk:
+	uint16_t first_chunk_elem = *first_chunk.begin();
+	uint16_t third_chunk_elem = first_chunk[2];
+
+	/* hmmm return is void....why.... again no more time... :(
+	// for this to work properly (as I think it is intended) the operator[] on chunks must return a view on the _container for the specific part
+	// Pointer to data in second chunk:
+	uint16_t * chunk_1_data = v_chunks[1].data();
+	// Pointer to data in third chunk (= end pointer of data in second chunk):
+	uint16_t * chunk_2_data = v_chunks[2].data();
+
+	*/
+
+
 
 
 
